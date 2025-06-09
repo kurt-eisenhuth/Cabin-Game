@@ -738,12 +738,23 @@ function renderPlayer() {
 }
 
 function renderCabin() {
-    // Cabin building
-    ctx.fillStyle = '#8b4513'; // Brown wood
+    // Log cabin walls
+    ctx.fillStyle = '#8B4513'; // Saddle brown for logs
     ctx.fillRect(gameState.cabin.x - 25, gameState.cabin.y - 20, 50, 40);
     
-    // Cabin roof
-    ctx.fillStyle = '#654321'; // Darker brown
+    // Log horizontal lines to show log construction
+    ctx.strokeStyle = '#654321'; // Darker brown for log lines
+    ctx.lineWidth = 1;
+    for (let i = 0; i < 4; i++) {
+        const y = gameState.cabin.y - 15 + (i * 10);
+        ctx.beginPath();
+        ctx.moveTo(gameState.cabin.x - 25, y);
+        ctx.lineTo(gameState.cabin.x + 25, y);
+        ctx.stroke();
+    }
+    
+    // Red cabin roof
+    ctx.fillStyle = '#CC0000'; // Classic red roof
     ctx.beginPath();
     ctx.moveTo(gameState.cabin.x - 30, gameState.cabin.y - 20);
     ctx.lineTo(gameState.cabin.x, gameState.cabin.y - 35);
@@ -751,9 +762,29 @@ function renderCabin() {
     ctx.closePath();
     ctx.fill();
     
-    // Door
-    ctx.fillStyle = '#4a4a4a';
-    ctx.fillRect(gameState.cabin.x - 5, gameState.cabin.y + 5, 10, 15);
+    // Roof ridge line
+    ctx.strokeStyle = '#8B0000'; // Dark red
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(gameState.cabin.x - 28, gameState.cabin.y - 22);
+    ctx.lineTo(gameState.cabin.x, gameState.cabin.y - 33);
+    ctx.lineTo(gameState.cabin.x + 28, gameState.cabin.y - 22);
+    ctx.stroke();
+    
+    // Wooden door
+    ctx.fillStyle = '#654321'; // Dark brown door
+    ctx.fillRect(gameState.cabin.x - 6, gameState.cabin.y + 4, 12, 16);
+    
+    // Door frame
+    ctx.strokeStyle = '#4a4a4a';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(gameState.cabin.x - 6, gameState.cabin.y + 4, 12, 16);
+    
+    // Door handle
+    ctx.fillStyle = '#FFD700'; // Gold door handle
+    ctx.beginPath();
+    ctx.arc(gameState.cabin.x + 3, gameState.cabin.y + 12, 1, 0, Math.PI * 2);
+    ctx.fill();
     
     // Fireplace (outside)
     ctx.fillStyle = '#666';

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open World Explorer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="ui-panel">
+            <div class="stats">
+                <h3>Explorer Stats</h3>
+                <div class="stat">Level: <span id="level">1</span></div>
+                <div class="stat">XP: <span id="xp">0</span> / <span id="xp-needed">100</span></div>
+                <div class="stat">Landmarks Found: <span id="landmarks-found">0</span></div>
+                <div class="stat">Resources Collected: <span id="resources-collected">0</span></div>
+                <div class="stat time-display">🕐 Time: <span id="game-time">06:00</span></div>
+                <div class="stat location-display">📍 <span id="location-status">At Cabin (Safe)</span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="xp-bar"></div>
+                </div>
+            </div>
+            
+            <div class="inventory">
+                <h3>Inventory</h3>
+                <div class="inventory-grid">
+                    <div class="inventory-item">🪵 Wood: <span id="wood-count">0</span></div>
+                    <div class="inventory-item">🪨 Stone: <span id="stone-count">0</span></div>
+                    <div class="inventory-item">⭐ Gold: <span id="gold-count">0</span></div>
+                    <div class="inventory-item">🐟 Fish: <span id="fish-count">0</span></div>
+                    <div class="inventory-item">🌿 Herbs: <span id="herbs-count">0</span></div>
+                    <div class="inventory-item">🔸 Sand Glass: <span id="sand_glass-count">0</span></div>
+                    <div class="inventory-item">🧱 Peat: <span id="peat-count">0</span></div>
+                </div>
+            </div>
+            
+            <div class="skills">
+                <h3>Skills</h3>
+                <div class="skill-points">Points Available: <span id="skill-points">0</span></div>
+                <div class="skill-tree">
+                    <div class="skill-category">
+                        <h4>Movement</h4>
+                        <button class="skill" id="speed1-skill" onclick="buySkill('speed1')">
+                            <strong>Swift Steps</strong><br>
+                            <small>Move 25% faster</small><br>
+                            <span class="cost">Cost: 1</span>
+                        </button>
+                        <button class="skill" id="speed2-skill" onclick="buySkill('speed2')">
+                            <strong>Fleet Foot</strong><br>
+                            <small>Move 50% faster</small><br>
+                            <span class="cost">Cost: 2</span>
+                        </button>
+                        <button class="skill" id="speed3-skill" onclick="buySkill('speed3')">
+                            <strong>Wind Walker</strong><br>
+                            <small>Move 100% faster</small><br>
+                            <span class="cost">Cost: 3</span>
+                        </button>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h4>Vision</h4>
+                        <button class="skill" id="vision1-skill" onclick="buySkill('vision1')">
+                            <strong>Sharp Eyes</strong><br>
+                            <small>See 25% further</small><br>
+                            <span class="cost">Cost: 1</span>
+                        </button>
+                        <button class="skill" id="vision2-skill" onclick="buySkill('vision2')">
+                            <strong>Eagle Sight</strong><br>
+                            <small>See 50% further</small><br>
+                            <span class="cost">Cost: 2</span>
+                        </button>
+                        <button class="skill" id="vision3-skill" onclick="buySkill('vision3')">
+                            <strong>Far Sight</strong><br>
+                            <small>See 100% further</small><br>
+                            <span class="cost">Cost: 3</span>
+                        </button>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h4>Discovery</h4>
+                        <button class="skill" id="luck1-skill" onclick="buySkill('luck1')">
+                            <strong>Lucky Find</strong><br>
+                            <small>+25% XP from discoveries</small><br>
+                            <span class="cost">Cost: 2</span>
+                        </button>
+                        <button class="skill" id="luck2-skill" onclick="buySkill('luck2')">
+                            <strong>Fortune's Favor</strong><br>
+                            <small>+50% XP from discoveries</small><br>
+                            <span class="cost">Cost: 3</span>
+                        </button>
+                        <button class="skill" id="luck3-skill" onclick="buySkill('luck3')">
+                            <strong>Blessed Explorer</strong><br>
+                            <small>+100% XP from discoveries</small><br>
+                            <span class="cost">Cost: 4</span>
+                        </button>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h4>Efficiency</h4>
+                        <button class="skill" id="stamina1-skill" onclick="buySkill('stamina1')">
+                            <strong>Endurance</strong><br>
+                            <small>Explore tiles 25% faster</small><br>
+                            <span class="cost">Cost: 2</span>
+                        </button>
+                        <button class="skill" id="stamina2-skill" onclick="buySkill('stamina2')">
+                            <strong>Tireless</strong><br>
+                            <small>Explore tiles 50% faster</small><br>
+                            <span class="cost">Cost: 3</span>
+                        </button>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h4>Rare Abilities</h4>
+                        <button class="skill rare" id="treasure-skill" onclick="buySkill('treasure')">
+                            <strong>Treasure Hunter</strong><br>
+                            <small>Find bonus XP caches</small><br>
+                            <span class="cost">Cost: 5</span>
+                        </button>
+                        <button class="skill rare" id="pathfinder-skill" onclick="buySkill('pathfinder')">
+                            <strong>Pathfinder</strong><br>
+                            <small>Leave trails behind you</small><br>
+                            <span class="cost">Cost: 4</span>
+                        </button>
+                        <button class="skill rare" id="cartographer-skill" onclick="buySkill('cartographer')">
+                            <strong>Master Cartographer</strong><br>
+                            <small>Reveal unexplored landmarks</small><br>
+                            <span class="cost">Cost: 6</span>
+                        </button>
+                    </div>
+                    
+                    <div class="skill-category">
+                        <h4>Legendary</h4>
+                        <button class="skill legendary" id="teleport-skill" onclick="buySkill('teleport')">
+                            <strong>Mystic Step</strong><br>
+                            <small>Click anywhere to teleport</small><br>
+                            <span class="cost">Cost: 8</span>
+                        </button>
+                        <button class="skill legendary" id="omniscient-skill" onclick="buySkill('omniscient')">
+                            <strong>All-Seeing</strong><br>
+                            <small>Reveal entire map</small><br>
+                            <span class="cost">Cost: 10</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="game-area">
+            <canvas id="game-canvas" width="800" height="600"></canvas>
+            <div class="controls">
+                <p>Click or drag to move around. Find red landmarks to gain XP!</p>
+                <button onclick="resetGame()">Reset Game</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="discovery-popup" class="notification hidden">
+        <div class="notification-content">
+            <h3>🏛️ Discovery!</h3>
+            <p id="discovery-text"></p>
+        </div>
+    </div>
+    
+    <div id="level-up-popup" class="notification level-up hidden">
+        <div class="notification-content">
+            <h3>🎉 Level Up!</h3>
+            <p>You've reached level <span id="new-level"></span>!</p>
+            <p>You gained a skill point!</p>
+        </div>
+    </div>
+    
+    <div id="resource-popup" class="notification resource hidden">
+        <div class="notification-content">
+            <h3>📦 Collected!</h3>
+            <p id="resource-text"></p>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html> 

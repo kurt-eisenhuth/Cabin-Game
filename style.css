@@ -1,0 +1,287 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-container {
+    display: flex;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    overflow: hidden;
+    max-width: 1200px;
+    width: 95%;
+}
+
+.ui-panel {
+    width: 400px;
+    background: #f8f9fa;
+    border-right: 2px solid #e9ecef;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-height: 100vh;
+    overflow-y: auto;
+}
+
+.stats h3, .skills h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 18px;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 8px;
+}
+
+.stat {
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #e9ecef;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.skill-points {
+    margin-bottom: 15px;
+    font-weight: bold;
+    color: #495057;
+}
+
+.inventory h3 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-size: 18px;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 8px;
+}
+
+.inventory-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.inventory-item {
+    background: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #dee2e6;
+    font-size: 12px;
+    text-align: center;
+}
+
+.skill-tree {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.skill-category {
+    margin-bottom: 15px;
+}
+
+.skill-category h4 {
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #dee2e6;
+    padding-bottom: 5px;
+}
+
+.skill {
+    background: #fff;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    padding: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    text-align: center;
+}
+
+.skill:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+}
+
+.skill:disabled {
+    background: #f8f9fa;
+    color: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.skill.owned {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.skill.rare {
+    border-color: #6f42c1;
+    background: linear-gradient(135deg, #fff 0%, #f8f0ff 100%);
+}
+
+.skill.rare:hover {
+    border-color: #6f42c1;
+    box-shadow: 0 4px 12px rgba(111,66,193,0.15);
+}
+
+.skill.legendary {
+    border-color: #fd7e14;
+    background: linear-gradient(135deg, #fff 0%, #fff8f0 100%);
+}
+
+.skill.legendary:hover {
+    border-color: #fd7e14;
+    box-shadow: 0 4px 12px rgba(253,126,20,0.15);
+}
+
+.cost {
+    font-weight: bold;
+    color: #dc3545;
+}
+
+.game-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+#game-canvas {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background: #000;
+    cursor: crosshair;
+}
+
+.controls {
+    margin-top: 15px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.controls p {
+    margin-bottom: 10px;
+    font-size: 14px;
+}
+
+.controls button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s ease;
+}
+
+.controls button:hover {
+    background: #0056b3;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    transform: translateX(0);
+    transition: all 0.3s ease;
+}
+
+.notification.hidden {
+    transform: translateX(400px);
+    opacity: 0;
+}
+
+.notification-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    text-align: center;
+    max-width: 300px;
+    min-width: 250px;
+    border-left: 4px solid #007bff;
+}
+
+.notification.level-up .notification-content {
+    border-left-color: #28a745;
+    background: linear-gradient(135deg, #fff 0%, #f8fff8 100%);
+}
+
+.notification.resource .notification-content {
+    border-left-color: #ffc107;
+    background: linear-gradient(135deg, #fff 0%, #fffdf0 100%);
+}
+
+.notification-content h3 {
+    color: #495057;
+    margin-bottom: 10px;
+    font-size: 18px;
+}
+
+.notification-content p {
+    color: #6c757d;
+    margin-bottom: 0;
+    line-height: 1.4;
+    font-size: 14px;
+}
+
+.notification-content p:last-child {
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .game-container {
+        flex-direction: column;
+        width: 98%;
+    }
+    
+    .ui-panel {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    
+    .stats, .skills {
+        min-width: 250px;
+    }
+    
+    #game-canvas {
+        width: 100%;
+        height: 400px;
+    }
+} 

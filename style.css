@@ -72,6 +72,12 @@ body {
     color: #495057;
 }
 
+.skill-hint {
+    font-size: 0.8em;
+    color: #6c757d;
+    font-weight: normal;
+}
+
 .inventory h3 {
     color: #495057;
     margin-bottom: 15px;

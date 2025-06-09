@@ -35,8 +35,8 @@
                 </div>
             </div>
             
-            <div class="skills">
-                <h3>Skills</h3>
+            <div class="skills" id="skills-panel" style="display: none;">
+                <h3>Skills <span class="skill-hint">(Press SPACE to toggle)</span></h3>
                 <div class="skill-points">Points Available: <span id="skill-points">0</span></div>
                 <div class="skill-tree">
                     <div class="skill-category">
@@ -149,7 +149,7 @@
         <div class="game-area">
             <canvas id="game-canvas" width="800" height="600"></canvas>
             <div class="controls">
-                <p>Click or drag to move around. Find red landmarks to gain XP!</p>
+                <p>Click or drag to move around. Press <strong>SPACE</strong> for skills. Find landmarks to gain XP!</p>
                 <button onclick="resetGame()">Reset Game</button>
             </div>
         </div>

@@ -1,6 +1,6 @@
 // Game state
 let gameState = {
-    player: { x: 400, y: 300, radius: 8, speed: 2 },
+    player: { x: 400, y: 300, radius: 5, speed: 2 },
     level: 1,
     xp: 0,
     xpNeeded: 100,
@@ -101,14 +101,13 @@ let discoveredResources = new Set();
 // Canvas and context
 let canvas, ctx;
 
-// Terrain types with properties
+// Terrain types with properties (mountains removed)
 const terrainTypes = {
     grass: { color: "#4a7c3c", speedMod: 1.0, passable: true, name: "Grassland" },
     forest: { color: "#2d5a27", speedMod: 0.7, passable: true, name: "Dense Forest" },
     water: { color: "#1e6091", speedMod: 0.3, passable: true, name: "Water" },
     sand: { color: "#c2b280", speedMod: 0.6, passable: true, name: "Desert" },
     mud: { color: "#8b7355", speedMod: 0.4, passable: true, name: "Swampland" },
-    mountain: { color: "#8c8c8c", speedMod: 0, passable: false, name: "Mountain" },
     hills: { color: "#a8a870", speedMod: 0.8, passable: true, name: "Hills" },
     stone: { color: "#6e6e6e", speedMod: 0.9, passable: true, name: "Rocky Ground" }
 };
@@ -116,8 +115,8 @@ const terrainTypes = {
 // Resource types that spawn on different terrains
 const resourceTypes = {
     wood: { color: "#8b4513", terrains: ["forest"], xp: 15, name: "Wood" },
-    stone: { color: "#696969", terrains: ["mountain", "hills", "stone"], xp: 20, name: "Stone" },
-    gold: { color: "#ffd700", terrains: ["mountain", "hills"], xp: 50, name: "Gold Ore" },
+    stone: { color: "#696969", terrains: ["hills", "stone"], xp: 20, name: "Stone" },
+    gold: { color: "#ffd700", terrains: ["hills"], xp: 50, name: "Gold Ore" },
     fish: { color: "#4682b4", terrains: ["water"], xp: 25, name: "Fish" },
     herbs: { color: "#32cd32", terrains: ["grass", "forest"], xp: 18, name: "Herbs" },
     sand_glass: { color: "#f5deb3", terrains: ["sand"], xp: 30, name: "Sand Glass" },
@@ -145,6 +144,9 @@ function initGame() {
     // Find safe spawn location for player
     findSafeSpawnLocation();
     
+    // Ensure cabin area stays safe (do this AFTER terrain generation)
+    ensureCabinSafety();
+    
     // Generate landmarks and resources
     generateLandmarks();
     generateResources();
@@ -154,6 +156,7 @@ function initGame() {
     canvas.addEventListener('mouseup', handleMouseUp);
     canvas.addEventListener('mousemove', handleMouseMove);
     canvas.addEventListener('click', handleClick);
+    document.addEventListener('keydown', handleKeyDown);
     
     // Start game loop
     gameLoop();
@@ -164,9 +167,12 @@ function findSafeSpawnLocation() {
     // Always spawn at cabin - it's the home base!
     gameState.player.x = gameState.cabin.x;
     gameState.player.y = gameState.cabin.y;
-    
-    // Ensure cabin area is grass terrain
-    const radius = 6; // Clear a larger area around cabin to match new safe zone
+    gameState.isInCabin = true;
+}
+
+function ensureCabinSafety() {
+    // Force cabin area to be grass terrain (do this AFTER terrain generation)
+    const radius = 8; // Even larger clearing for the bigger safe zone
     const cabinTileX = Math.floor(gameState.cabin.x / gameState.world.tileSize);
     const cabinTileY = Math.floor(gameState.cabin.y / gameState.world.tileSize);
     
@@ -178,7 +184,7 @@ function findSafeSpawnLocation() {
         }
     }
     
-    gameState.isInCabin = true;
+    console.log("Cabin safety ensured - cleared", (radius * 2 + 1) * (radius * 2 + 1), "tiles around cabin");
 }
 
 function generateTerrain() {
@@ -187,7 +193,7 @@ function generateTerrain() {
     const worldWidth = Math.ceil(gameState.world.width / tileSize);
     const worldHeight = Math.ceil(gameState.world.height / tileSize);
     
-    // Create noise-like terrain generation
+    // Create noise-based terrain generation (coherent biomes, no mountains)
     for (let x = 0; x < worldWidth; x++) {
         for (let y = 0; y < worldHeight; y++) {
             const noise = (Math.sin(x * 0.1) + Math.cos(y * 0.1) + Math.sin((x + y) * 0.05)) / 3;
@@ -199,19 +205,15 @@ function generateTerrain() {
             if (noise < -0.4) {
                 terrain = 'water';
             }
-            // Mountains (high height + high noise)
-            else if (heightNoise > 0.3 && noise > 0.2) {
-                terrain = 'mountain';
-            }
-            // Hills (moderate height)
-            else if (heightNoise > 0.1) {
+            // Hills (moderate to high height)
+            else if (heightNoise > 0.2) {
                 terrain = 'hills';
             }
             // Desert areas (specific noise pattern)
             else if (Math.sin(x * 0.07) + Math.cos(y * 0.09) > 0.5) {
                 terrain = 'sand';
             }
-            // Swamps (near water)
+            // Swamps (near water, low areas)
             else if (noise < -0.1 && heightNoise < 0.1) {
                 terrain = 'mud';
             }
@@ -219,7 +221,7 @@ function generateTerrain() {
             else if (noise > 0.1 && heightNoise < 0.2) {
                 terrain = 'forest';
             }
-            // Rocky areas
+            // Rocky areas (moderate height)
             else if (heightNoise > 0.05 && noise > 0.0) {
                 terrain = 'stone';
             }
@@ -231,7 +233,7 @@ function generateTerrain() {
 
 function generateResources() {
     resourceNodes = [];
-    const numResources = 200; // Lots of resources to find
+    const numResources = 250; // Slightly more resources for better discovery pace
     
     for (let i = 0; i < numResources; i++) {
         const x = Math.random() * (gameState.world.width - 40) + 20;
@@ -267,7 +269,7 @@ function generateResources() {
 function generateLandmarks() {
     landmarks = [];
     const numLandmarks = 50; // More landmarks for bigger world
-    const minDistance = 200; // Minimum distance between landmarks
+            const minDistance = 300; // Spread landmarks out more for better exploration pacing
     
     for (let i = 0; i < numLandmarks; i++) {
         let attempts = 0;
@@ -324,6 +326,19 @@ function updateMousePos(e) {
     gameState.mousePos.y = e.clientY - rect.top;
 }
 
+function handleKeyDown(e) {
+    if (e.code === 'Space') {
+        e.preventDefault(); // Prevent page scrolling
+        toggleSkillPanel();
+    }
+}
+
+function toggleSkillPanel() {
+    const skillsPanel = document.getElementById('skills-panel');
+    const isVisible = skillsPanel.style.display !== 'none';
+    skillsPanel.style.display = isVisible ? 'none' : 'block';
+}
+
 function gameLoop() {
     update();
     render();
@@ -347,44 +362,15 @@ function update() {
             const currentTerrain = terrainMap.get(`${playerTileX},${playerTileY}`) || 'grass';
             const terrainSpeed = terrainTypes[currentTerrain].speedMod;
             
-            // Emergency check: if player is stuck in impassable terrain, move them to safety
-            // Only do this if we're actually stuck (not just transitioning)
-            if (!terrainTypes[currentTerrain].passable && !gameState.isInCabin) {
-                // Find nearest passable tile
-                for (let radius = 1; radius <= 3; radius++) { // Reduced search radius
-                    for (let dx = -radius; dx <= radius; dx++) {
-                        for (let dy = -radius; dy <= radius; dy++) {
-                            const checkX = playerTileX + dx;
-                            const checkY = playerTileY + dy;
-                            const checkTerrain = terrainMap.get(`${checkX},${checkY}`) || 'grass';
-                            
-                            if (terrainTypes[checkTerrain].passable) {
-                                gameState.player.x = (checkX * gameState.world.tileSize) + (gameState.world.tileSize / 2);
-                                gameState.player.y = (checkY * gameState.world.tileSize) + (gameState.world.tileSize / 2);
-                                return; // Exit early once we find safety
-                            }
-                        }
-                    }
-                }
-            }
+            // Apply terrain speed modifiers and movement skills
+            let speedMultiplier = 1;
+            if (gameState.skills.speed1.owned) speedMultiplier += 0.25;
+            if (gameState.skills.speed2.owned) speedMultiplier += 0.25;
+            if (gameState.skills.speed3.owned) speedMultiplier += 0.5;
             
-            // Check if destination terrain is passable
-            const targetX = gameState.player.x + (dx / distance) * gameState.player.speed;
-            const targetY = gameState.player.y + (dy / distance) * gameState.player.speed;
-            const targetTileX = Math.floor(targetX / gameState.world.tileSize);
-            const targetTileY = Math.floor(targetY / gameState.world.tileSize);
-            const targetTerrain = terrainMap.get(`${targetTileX},${targetTileY}`) || 'grass';
-            
-            if (terrainTypes[targetTerrain].passable) {
-                let speedMultiplier = 1;
-                if (gameState.skills.speed1.owned) speedMultiplier += 0.25;
-                if (gameState.skills.speed2.owned) speedMultiplier += 0.25;
-                if (gameState.skills.speed3.owned) speedMultiplier += 0.5;
-                
-                const speed = gameState.player.speed * speedMultiplier * terrainSpeed;
-                gameState.player.x += (dx / distance) * speed;
-                gameState.player.y += (dy / distance) * speed;
-            }
+            const speed = gameState.player.speed * speedMultiplier * terrainSpeed;
+            gameState.player.x += (dx / distance) * speed;
+            gameState.player.y += (dy / distance) * speed;
             
             // Keep player in bounds
             gameState.player.x = Math.max(gameState.player.radius, 
@@ -1002,7 +988,7 @@ function closePopup() {
 function resetGame() {
     // Reset game state
     gameState = {
-        player: { x: 400, y: 300, radius: 8, speed: 2 },
+        player: { x: 400, y: 300, radius: 5, speed: 2 },
         level: 1,
         xp: 0,
         xpNeeded: 100,

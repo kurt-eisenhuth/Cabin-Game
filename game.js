@@ -36,7 +36,7 @@ let gameState = {
     cabin: {
         x: 400,
         y: 300,
-        radius: 80, // Safe zone radius
+        radius: 120, // Larger safe zone radius
         upgrades: {
             storage: 1,
             fireplace: 1,
@@ -51,17 +51,6 @@ let gameState = {
         realTimePerGameDay: 30 * 60 * 1000, // 30 minutes in milliseconds
         isPaused: false
     },
-    cabin: {
-        x: 400,
-        y: 300,
-        radius: 80, // Safe zone radius
-        upgrades: {
-            storage: 1,
-            fireplace: 1,
-            workbench: 1
-        }
-    },
-    isInCabin: true,
     skills: {
         // Movement Skills
         speed1: { owned: false, cost: 1, name: "Swift Steps", desc: "Move 25% faster" },
@@ -177,7 +166,7 @@ function findSafeSpawnLocation() {
     gameState.player.y = gameState.cabin.y;
     
     // Ensure cabin area is grass terrain
-    const radius = 3; // Clear a small area around cabin
+    const radius = 6; // Clear a larger area around cabin to match new safe zone
     const cabinTileX = Math.floor(gameState.cabin.x / gameState.world.tileSize);
     const cabinTileY = Math.floor(gameState.cabin.y / gameState.world.tileSize);
     
@@ -359,9 +348,10 @@ function update() {
             const terrainSpeed = terrainTypes[currentTerrain].speedMod;
             
             // Emergency check: if player is stuck in impassable terrain, move them to safety
-            if (!terrainTypes[currentTerrain].passable) {
+            // Only do this if we're actually stuck (not just transitioning)
+            if (!terrainTypes[currentTerrain].passable && !gameState.isInCabin) {
                 // Find nearest passable tile
-                for (let radius = 1; radius <= 5; radius++) {
+                for (let radius = 1; radius <= 3; radius++) { // Reduced search radius
                     for (let dx = -radius; dx <= radius; dx++) {
                         for (let dy = -radius; dy <= radius; dy++) {
                             const checkX = playerTileX + dx;
@@ -738,6 +728,30 @@ function renderPlayer() {
 }
 
 function renderCabin() {
+    // Big Oak Tree (in front of cabin)
+    const treeX = gameState.cabin.x - 15;
+    const treeY = gameState.cabin.y - 60;
+    
+    // Tree trunk
+    ctx.fillStyle = '#8B4513'; // Brown trunk
+    ctx.fillRect(treeX - 4, treeY + 20, 8, 25);
+    
+    // Tree foliage (multiple layers for fullness)
+    ctx.fillStyle = '#228B22'; // Forest green
+    ctx.beginPath();
+    ctx.arc(treeX, treeY, 20, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#32CD32'; // Lime green (lighter layer)
+    ctx.beginPath();
+    ctx.arc(treeX - 5, treeY - 5, 15, 0, Math.PI * 2);
+    ctx.fill();
+    
+    ctx.fillStyle = '#90EE90'; // Light green (highlights)
+    ctx.beginPath();
+    ctx.arc(treeX + 3, treeY - 8, 12, 0, Math.PI * 2);
+    ctx.fill();
+    
     // Log cabin walls
     ctx.fillStyle = '#8B4513'; // Saddle brown for logs
     ctx.fillRect(gameState.cabin.x - 25, gameState.cabin.y - 20, 50, 40);
@@ -786,15 +800,41 @@ function renderCabin() {
     ctx.arc(gameState.cabin.x + 3, gameState.cabin.y + 12, 1, 0, Math.PI * 2);
     ctx.fill();
     
-    // Fireplace (outside)
-    ctx.fillStyle = '#666';
-    ctx.fillRect(gameState.cabin.x + 35, gameState.cabin.y - 5, 15, 10);
+    // Fireplace (moved to bottom right, away from cabin)
+    const fireplaceX = gameState.cabin.x + 45;
+    const fireplaceY = gameState.cabin.y + 30;
+    
+    // Stone fireplace base
+    ctx.fillStyle = '#696969'; // Dark gray stones
+    ctx.fillRect(fireplaceX - 8, fireplaceY - 5, 16, 12);
+    
+    // Fireplace stones (individual stones)
+    ctx.fillStyle = '#808080'; // Light gray
+    ctx.fillRect(fireplaceX - 6, fireplaceY - 3, 4, 4);
+    ctx.fillRect(fireplaceX + 2, fireplaceY - 3, 4, 4);
+    ctx.fillRect(fireplaceX - 2, fireplaceY + 1, 4, 4);
     
     // Fire effect (if player is in cabin)
     if (gameState.isInCabin) {
+        // Main fire
         ctx.fillStyle = '#ff6b35';
         ctx.beginPath();
-        ctx.arc(gameState.cabin.x + 42, gameState.cabin.y - 2, 3, 0, Math.PI * 2);
+        ctx.arc(fireplaceX, fireplaceY, 4, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Fire flicker effect
+        ctx.fillStyle = '#ffff00'; // Yellow flame center
+        ctx.beginPath();
+        ctx.arc(fireplaceX - 1, fireplaceY - 2, 2, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Smoke (small gray circles going up)
+        ctx.fillStyle = 'rgba(128, 128, 128, 0.6)';
+        ctx.beginPath();
+        ctx.arc(fireplaceX, fireplaceY - 10, 2, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(fireplaceX + 2, fireplaceY - 15, 1.5, 0, Math.PI * 2);
         ctx.fill();
     }
     
@@ -988,7 +1028,7 @@ function resetGame() {
         cabin: {
             x: 400,
             y: 300,
-            radius: 80, // Safe zone radius
+            radius: 120, // Larger safe zone radius
             upgrades: {
                 storage: 1,
                 fireplace: 1,
